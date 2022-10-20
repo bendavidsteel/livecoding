@@ -1,0 +1,24 @@
+setcps(120/60/4)
+
+d1 $ every 2 ("<0.125 0.25 0.5>" <~) $ s "[808oh(5,16,2),hc(9,16,2)]" # n (irand 10)
+  # gain 0.6
+
+d3 $ s "[~ cp]*4" # n (irand 5)
+
+d4 $ s "909 [~ 909] ~ ~" # n (irand 10)
+
+d5 $ silence
+
+d6 $ silence
+
+d7 $ silence
+
+d8 $ silence
+
+hush
+
+nudgeAll 0.83
+
+gain
+
+resetCycles

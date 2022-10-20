@@ -1,0 +1,21 @@
+setcps(130/60/4)
+
+d1 $ jux (# lpf 0.2) $ note (off 0.25 (|- 12) $ off 0.125 (|- 7)  "<c*2 a(3,8) f(3,8,2) e*2>")
+  # sound "juno"
+  # n 7
+  # sustain 2
+  # room (slow 7 $ range 0.2 0.5 sine)
+  # sz 0.9
+  # pan (slow 2 $ range 0.3 0.7 sine)
+
+d2 $ note (off 0.125 (|+7) $ off 0.25 (|+12) "[c e g a]*2")
+  # sound "juno"
+  # n 4
+  # velocity 0.7
+  # sustain 4
+  # detune (slow 5 $ range 0.1 1 sine)
+  # distort (slow 11 $ range 0.1 0.4 sine)
+  # room 0.2
+  # sz 0.5
+
+hush

@@ -1,0 +1,46 @@
+setcps(130/60/4)
+
+d1 $ s "808bd!4"
+  # n "[1 3 <1 4>]*3"
+  # nudge (range 0 0.01 rand)
+  # sz 0.4
+  # room 0.3
+  # djf (slow 3 $ range 0.3 0.5 sine)
+  # gain 1.2
+
+d6 $ s "[~ <cp cp cp cp [cp ~ ~ ~ cp]>]*2"
+  # n "[1 3 <1 4>]*3"
+  # nudge (range 0 0.01 rand)
+  # sz 0.4
+  # room 0.3
+  # gain 1.2
+  # pan (slow 3 sine)
+
+d2 $ ghost $ degradeBy 0.1 $ s "[[~!2 808oh ~]*4, [hc!2 ~ hc] [hc!2 ~!2] [hc ~!2 hc] [hc!2 ~ hc]]"
+  # n "[1 <2 3> <1 5>]*3"
+  # nudge (range 0 0.01 rand)
+  # pan (slow 2 sine)
+  # djf (slow 5 $ range 0.5 0.7 sine)
+
+d4 $ s "[[[~ 808ht!2 ~] ~ ]!2,[~[~!2 808ht!2]]!2]"
+  # n "[5]/3"
+  # nudge (range 0 0.01 rand)
+  # sz 0.3
+  # squiz (slow 5 $ range 1 1.3 sine)
+
+d5 $ s "[~!3 [~!2 808sd ~], ~ [~!3 808sd] [~ 808sd ~!2] ~]"
+  # n "<1 3 5>"
+  # sz 0.4
+  # room 0.7
+
+d3 $ slow 5 $ note "f'min9 [af'maj9'i c'min7'i] f'min9 [af'maj7 c'min7] f'min11"
+  # sound "superfm"
+  # voice 4
+  # room (slow 7 $ range 0.4 0.7 sine)
+  # sz 0.9
+  # pan (slow 2 $ range 0.3 0.7 sine)
+  # gain 0.65
+
+d3 $ silence
+
+hush
