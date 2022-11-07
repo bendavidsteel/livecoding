@@ -152,7 +152,7 @@ void main () {
   vec2 m = varpos.xy / resolution.xy;
 
   vec3 ro = vec3 (-40, 30.1, -10); // Ray origin
-  ro.yz *= Rotate (-m.y * 2.0 * PI + PI - 1.1); // Rotate thew ray with the mouse rotation
+  ro.yz *= Rotate (-0.5 * 2.0 * PI + PI - 1.1); // Rotate thew ray with the mouse rotation
   ro.xz *= Rotate (-time * 2.0 * PI / 10.0);
   vec3 rd = R (uv, ro, vec3 (0, 1, 0), 1.); // Ray direction (based on mouse rotation)
 
