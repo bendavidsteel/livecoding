@@ -11,20 +11,10 @@
  * Direct link to ShaderToy: <not available yet>
  */
 
-#ifdef GL_ES
-precision mediump float;
-#endif
-
 #define MaximumRaySteps 100
 #define MaximumDistance 1000.
 #define MinimumDistance .01
 #define PI 3.141592653589793238
-
-// we need the sketch resolution to perform some calculations
-uniform vec2 resolution;
-uniform float time;
-uniform float var1;
-uniform float var2;
 
 // TRANSFORM FUNCTIONS //
 
@@ -56,34 +46,35 @@ float map (float value, float min1, float max1, float min2, float max2) {
   return min2 + (value - min1) * (max2 - min2) / (max1 - min1);
 }
 
-float sierpinski3 (vec3 z) {
-  const int iterations = 15;
+float Sierpinski3 (vec3 z) {
+  float iterations = 15.0;
   float Scale = 2.0;
   float Offset = 3.0;
   float i = 0.0;
 
   float r;
-  int final_n = iterations;
-  for (int n = 0; n < iterations; n++) {
+  int n = 0;
+  while (n < int (iterations)) {
     if (z.x + z.y < 0.0) z.xy = -z.yx; // fold 1
     if (z.x + z.z < 0.0) z.xz = -z.zx; // fold 2
     if (z.y + z.z < 0.0) z.zy = -z.yz; // fold 3
     z = z * Scale - Offset * (Scale - 1.0);
+    n++;
   }
-  return (length (z)) * pow (Scale, -float (final_n));
+  return (length (z)) * pow (Scale, -float (n));
 }
 
 // Calculates de distance from a position p to the scene
 float DistanceEstimator (vec3 p) {
   p.yz *= Rotate (0.20 * PI);
   p.yx *= Rotate (0.25 * PI);
-  float sierpinski = sierpinski3 (p);
+  float sierpinski = Sierpinski3 (p);
   return sierpinski;
 }
 
 // Marches the ray in the scene
 vec4 RayMarcher (vec3 ro, vec3 rd) {
-  float steps = float (MaximumRaySteps) - 1.0;
+  float steps = 0.0;
   float totalDistance = 0.0;
   float minDistToScene = 100.0;
   vec3 minDistToScenePos = ro;
@@ -93,7 +84,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
   vec3 curPos = ro;
   bool hit = false;
 
-  for (float s = 0.0; s < float (MaximumRaySteps); s++) {
+  for (steps = 0.0; steps < float (MaximumRaySteps); steps++) {
     vec3 p = ro + totalDistance * rd; // Current position of the ray
     float distance = DistanceEstimator (p); // Distance from the current position to the scene
     curPos = ro + rd * totalDistance;
@@ -108,11 +99,9 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
     totalDistance += distance; // Increases the total distance armched
     if (distance < MinimumDistance) {
       hit = true;
-      steps = s;
       break; // If the ray marched more than the max steps or the max distance, breake out
     }
     else if (distance > MaximumDistance) {
-      steps = s;
       break;
     }
   }
@@ -132,7 +121,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
     col.rgb = vec3 (0.8 + (length (minDistToScenePos) / 8.0), 1.0, 0.8);
     col.rgb = hsv2rgb (col.rgb);
     col.rgb *= 1.0 / pow (minDistToScene, 1.0);
-    col.rgb /= 15.0 * map (sin (time * 3.0), -1.0, 1.0, 1.0, 3.0);
+    col.rgb /= 15.0 * map (sin (iTime * 3.0), -1.0, 1.0, 1.0, 3.0);
   }
   col.rgb /= iterations / 10.0; // Ambeint occlusion
   col.rgb /= pow (distance (ro, minDistToScenePos), 2.0);
@@ -141,23 +130,19 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
   return col;
 }
 
-void main () {
+void mainImage (out vec4 fragColor, in vec2 fragCoord) {
   // Normalized pixel coordinates (from 0 to 1)
-  vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / resolution.y;
+  vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
   uv *= 0.2;
-
-  vec2 varpos;
-  varpos.x = var1;
-  varpos.y = var2;
-  vec2 m = varpos.xy / resolution.xy;
+  vec2 m = iMouse.xy / iResolution.xy;
 
   vec3 ro = vec3 (-40, 30.1, -10); // Ray origin
   ro.yz *= Rotate (-m.y * 2.0 * PI + PI - 1.1); // Rotate thew ray with the mouse rotation
-  ro.xz *= Rotate (-time * 2.0 * PI / 10.0);
+  ro.xz *= Rotate (-iTime * 2.0 * PI / 10.0);
   vec3 rd = R (uv, ro, vec3 (0, 1, 0), 1.); // Ray direction (based on mouse rotation)
 
   vec4 col = RayMarcher (ro, rd);
 
   // Output to screen
-  gl_FragColor = vec4 (col);
+  fragColor = vec4 (col);
 }

@@ -109,7 +109,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
 
   for (float s = 0.0; s < float (MaximumRaySteps); s++) {
     vec3 p = ro + totalDistance * rd; // Current position of the ray
-    float distance = DistanceEstimator (p); // Distance from the current position to the scene
+    float distance = MandelDistanceEstimator (p); // Distance from the current position to the scene
     curPos = ro + rd * totalDistance;
     if (minDistToScene > distance) {
       minDistToScene = distance;

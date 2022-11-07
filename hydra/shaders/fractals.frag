@@ -117,102 +117,6 @@ vec3 box (vec3 z) {
   return clamp (z, -1.0, 1.0) * 2.0 - z;
 }
 
-// Sphere
-// s: radius
-float SignedDistSphere (vec3 p, float s) {
-  return length (p) - s;
-}
-
-// Box
-// b: size of box in x/y/z
-float SignedDistBox (vec3 p, vec3 b) {
-  vec3 d = abs (p) - b;
-  return min (max (d.x, max (d.y, d.z)), 0.0) + length (max (d, 0.0));
-}
-
-// (Infinite) Plane
-// n.xyz: normal of the plane (normalized)
-// n.w: offset from origin
-float SignedDistPlane (vec3 p, vec4 n) {
-  return dot (p, n.xyz) + n.w;
-}
-
-// Rounded box
-// r: radius of the rounded edges
-float SignedDistRoundBox (in vec3 p, in vec3 b, in float r) {
-  vec3 q = abs (p) - b;
-  return min (max (q.x, max (q.y, q.z)), 0.0) + length (max (q, 0.0)) - r;
-}
-
-// BOOLEAN OPERATORS //
-
-// Union
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-float opU (float d1, float d2) {
-  return (d1 < d2) ? d1 : d2;
-}
-
-// Subtraction
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-vec4 opS (vec4 d1, vec4 d2) {
-  return (-d1.w > d2.w) ? -d1 : d2;
-}
-
-// Intersection
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-vec4 opI (vec4 d1, vec4 d2) {
-  return (d1.w > d2.w) ? d1 : d2;
-}
-
-// Mod Position Axis
-float pMod1 (inout float p, float size) {
-  float halfsize = size * 0.5;
-  float c = floor ((p + halfsize) / size);
-  p = mod (p + halfsize, size) - halfsize;
-  p = mod (-p + halfsize, size) - halfsize;
-  return c;
-}
-
-// SMOOTH BOOLEAN OPERATORS //
-
-// Smooth Union
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-// k: smoothness value for the trasition
-float opUS (float d1, float d2, float k) {
-  float h = clamp (0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
-  float dist = mix (d2, d1, h) - k * h * (1.0 - h);
-
-  return dist;
-}
-
-// Smooth Subtraction
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-// k: smoothness value for the trasition
-vec4 opSS (vec4 d1, vec4 d2, float k) {
-  float h = clamp (0.5 - 0.5 * (d2.w + d1.w) / k, 0.0, 1.0);
-  float dist = mix (d2.w, -d1.w, h) + k * h * (1.0 - h);
-  vec3 color = mix (d2.rgb, d1.rgb, h);
-
-  return vec4 (color.rgb, dist);
-}
-
-// Smooth Intersection
-// d1: signed distance to shape 1
-// d2: signed distance to shape 2
-// k: smoothness value for the trasition
-vec4 opIS (vec4 d1, vec4 d2, float k) {
-  float h = clamp (0.5 - 0.5 * (d2.w - d1.w) / k, 0.0, 1.0);
-  float dist = mix (d2.w, d1.w, h) + k * h * (1.0 - h);
-  vec3 color = mix (d2.rgb, d1.rgb, h);
-
-  return vec4 (color.rgb, dist);
-}
-
 float DE0 (vec3 pos) {
   vec2 varpos;
   varpos.x = var1;
@@ -250,7 +154,7 @@ float BoxDistanceEstimator (vec3 pos) {
   return max (d0, d2);
 }
 
-float Sierpinski3 (out vec3 z) {
+float Sierpinski3 (vec3 z) {
   const int iterations = 25;
   float Scale = 2.0 + (sin (time / 2.0) + 1.0);
   vec3 Offset = 3.0 * vec3 (1.0, 1.0, 1.0);
@@ -316,33 +220,10 @@ float Sierpinski3 (out vec3 z) {
   return (length (z) - norm_offset) * pow (Scale, -float (final_n));
 }
 
-float BrocolliDistanceEstimator (out vec3 p) {
+float SierpinskiDistanceEstimator (vec3 p) {
   p.yz *= Rotate (0.2 * PI);
   p.yx *= Rotate (0.3 * PI);
   p.xz *= Rotate (0.29 * PI);
-  float sierpinski = Sierpinski3 (p);
-  return sierpinski;
-}
-
-float MushroomDistanceEstimator (out vec3 p) {
-  p.yz *= Rotate (0.2 * PI);
-  p.yx *= Rotate (0.3 * PI);
-  p.xz *= Rotate (0.29 * PI);
-  float sierpinski = Sierpinski3 (p);
-  return sierpinski;
-}
-
-float SpongeDistanceEstimator (out vec3 p) {
-  p.yz *= Rotate (0.2 * PI);
-  p.yx *= Rotate (0.3 * PI);
-  p.xz *= Rotate (0.29 * PI);
-  float sierpinski = Sierpinski3 (p);
-  return sierpinski;
-}
-
-float TetDistanceEstimator (out vec3 p) {
-  p.yz *= Rotate (0.20 * PI);
-  p.yx *= Rotate (0.25 * PI);
   float sierpinski = Sierpinski3 (p);
   return sierpinski;
 }
@@ -394,14 +275,8 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
     vec3 p = ro + totalDistance * rd; // Current position of the ray
 
     float distance = minDistToScene;
-    if (fractal_type == TET) {
-      distance = TetDistanceEstimator (p); // Distance from the current position to the scene
-    } else if (fractal_type == SPONGE) {
-      distance = SpongeDistanceEstimator(p);
-    } else if (fractal_type == BROCOLLI) {
-      distance = BrocolliDistanceEstimator(p);
-    } else if (fractal_type == MUSHROOM) {
-      distance = MushroomDistanceEstimator(p);
+    if (fractal_type <= 3) {
+      distance = SierpinskiDistanceEstimator (p); // Distance from the current position to the scene
     } else if (fractal_type == BULB) {
       distance = BulbDistanceEstimator(p);
     } else if (fractal_type == BOX) {

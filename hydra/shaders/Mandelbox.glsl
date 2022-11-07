@@ -11,20 +11,10 @@
  * Direct link to ShaderToy: <not available yet>
 */
 
-#ifdef GL_ES
-precision mediump float;
-#endif
-
 #define MaximumRaySteps 2500
 #define MaximumDistance 200.
 #define MinimumDistance .001
 #define PI 3.141592653589793238
-
-// we need the sketch resolution to perform some calculations
-uniform vec2 resolution;
-uniform float time;
-uniform float var1;
-uniform float var2;
 
 // TRANSFORM FUNCTIONS //
 
@@ -69,10 +59,7 @@ vec3 box (vec3 z) {
 }
 
 float DE0 (vec3 pos) {
-  vec2 varpos;
-  varpos.x = var1;
-  varpos.y = var2;
-  vec2 m = varpos.xy / resolution.xy;
+  vec2 m = iMouse.xy / iResolution.xy;
   vec3 from = vec3 (0.0);
   vec3 z = pos - from;
   float r = dot (pos - from, pos - from) * pow (length (z), 2.0);
@@ -80,10 +67,7 @@ float DE0 (vec3 pos) {
 }
 
 float DE2 (vec3 pos) {
-  vec2 varpos;
-  varpos.x = var1;
-  varpos.y = var2;
-  vec2 m = varpos.xy / resolution.xy;
+  vec2 m = iMouse.xy / iResolution.xy;
   // vec3 params = vec3 (0.22, 0.5, 0.5);
   vec3 params = vec3 (0.5, 0.5, 0.5);
   vec4 scale = vec4 (-20.0 * 0.272321);
@@ -109,7 +93,7 @@ float DE (vec3 pos) {
 
 // Marches the ray in the scene
 vec4 RayMarcher (vec3 ro, vec3 rd) {
-  float steps = float (MaximumRaySteps) - 1.0;
+  float steps = 0.0;
   float totalDistance = 0.0;
   float minDistToScene = 100.0;
   vec3 minDistToScenePos = ro;
@@ -119,7 +103,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
   vec3 curPos = ro;
   bool hit = false;
 
-  for (float s = 0.0; s < float (MaximumRaySteps); s++) {
+  for (steps = 0.0; steps < float (MaximumRaySteps); steps++) {
     vec3 p = ro + totalDistance * rd; // Current position of the ray
     float distance = DE (p); // Distance from the current position to the scene
     curPos = ro + rd * totalDistance;
@@ -134,11 +118,9 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
     totalDistance += distance; // Increases the total distance armched
     if (distance < MinimumDistance) {
       hit = true;
-      steps = s;
       break; // If the ray marched more than the max steps or the max distance, breake out
     }
     else if (distance > MaximumDistance) {
-      steps = s;
       break;
     }
   }
@@ -157,22 +139,19 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
   return col;
 }
 
-void main () {
+void mainImage (out vec4 fragColor, in vec2 fragCoord) {
   // Normalized pixel coordinates (from 0 to 1)
-  vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / resolution.y;
+  vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
   //uv *= 1.5;
-  vec2 varpos;
-  varpos.x = var1;
-  varpos.y = var2;
-  vec2 m = varpos.xy / resolution.xy;
+  vec2 m = iMouse.xy / iResolution.xy;
 
   vec3 ro = vec3 (0, 0, -2.0); // Ray origin
-  ro.yz *= Rotate ((time * PI + 1.0) / 20.0); // Rotate thew ray with the mouse rotation
-  ro.xz *= Rotate (time * 2.0 * PI / 10.0);
+  ro.yz *= Rotate ((iTime * PI + 1.0) / 20.0); // Rotate thew ray with the mouse rotation
+  ro.xz *= Rotate (iTime * 2.0 * PI / 10.0);
   vec3 rd = R (uv, ro, vec3 (0, 0, 1), 1.); // Ray direction (based on mouse rotation)
 
   vec4 col = RayMarcher (ro, rd);
 
   // Output to screen
-  gl_FragColor = vec4 (col);
+  fragColor = vec4 (col);
 }
