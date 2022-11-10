@@ -7,16 +7,18 @@ precision mediump float;
 
 #define TET 0
 #define SPONGE 1
-#define BROCOLLI 2
-#define MUSHROOM 3
-#define BULB 4
-#define BOX 5
+#define BULB 2
+#define BOX 3
 
 uniform vec2 resolution;
 uniform float time;
 uniform float var1;
 uniform float var2;
-const int fractal_type = 0;
+const int fractal_type = 1;
+const float transform_1 = 0.1;
+const float transform_2 = .1;
+
+const mat2 identity2 = mat2 (1., 0., 0., 1.);
 
 // TRANSFORM FUNCTIONS //
 
@@ -62,6 +64,10 @@ float mandelbulb (vec3 position) {
       break;
     }
 
+    z.yz *= (1. - transform_1) * identity2 + transform_1 * Rotate ((time / 2.0) / 2.0);
+    z.xz *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 2.0) / 5.0);
+    z.yx *= (1. - transform_2) * identity2 + transform_2 * Rotate ((0.436332 + sin(time * 0.9) * 0.1 + 4.9));
+
     // convert to polar coordinates
     float theta = acos (z.z / r);
     float phi = atan (z.y, z.x);
@@ -74,6 +80,9 @@ float mandelbulb (vec3 position) {
 
     // convert back to cartesian coordinates
     z = zr * vec3 (sin (theta) * cos (phi), sin (phi) * sin (theta), cos (theta));
+
+    z.yx *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 5.0));
+
     z += position;
   }
   float dst = 0.5 * log (r) * r / dr;
@@ -118,6 +127,10 @@ float DE2 (vec3 pos) {
   vec4 c = vec4 (params, 0.5) - 0.5; // param = 0..1
 
   for (float i = 0.0; i < 10.0; i++) {
+    p.yz *= (1. - transform_1) * identity2 + transform_1 * Rotate ((time / 2.0) / 2.0);
+    p.xz *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 2.0) / 5.0);
+    p.yx *= (1. - transform_2) * identity2 + transform_2 * Rotate ((0.436332 + sin(time * 0.9) * 0.1 + 4.9));
+
     p.xyz = box (p.xyz);
     p = sphere (p);
     p = p * scale + c;
@@ -136,10 +149,7 @@ float BoxDistanceEstimator (vec3 pos) {
 float sierpinski3 (vec3 z) {
   const int iterations = 25;
   float Scale = 2.0 + (sin (time / 2.0) + 1.0);
-  vec3 Offset = 3.0 * vec3 (1.0, 1.0, 1.0);
-  if (fractal_type == BROCOLLI) {
-    Offset = vec3 (2.0, 4.8, 0.0);
-  }
+  vec3 Offset = (1. - transform_2) * 3.0 * vec3 (1.0, 1.0, 1.0) + transform_2 * vec3 (2., 4.8, 0.);
   float bailout = 1000.0;
 
   float r = length (z);
@@ -147,14 +157,19 @@ float sierpinski3 (vec3 z) {
   for (int n = 0; n < iterations; n++) {
 
     if (fractal_type == TET) {
+      z.yx *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 5.0));
+	    
       if (z.x + z.y < 0.0) z.xy = -z.yx; // fold 1
       if (z.x + z.z < 0.0) z.xz = -z.zx; // fold 2
       if (z.y + z.z < 0.0) z.zy = -z.yz; // fold 3
+	    
+      z.yz *= (1. - transform_1) * identity2 + transform_1 * Rotate ((time / 2.0) / 2.0);
+      z.xz *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 2.0) / 5.0);
+      z.yx *= (1. - transform_2) * identity2 + transform_2 * Rotate ((0.436332 + sin(time * 0.9) * 0.1 + 4.9));
+	    
       z = z * Scale - Offset * (Scale - 1.0);
     } else {
-      if (fractal_type == MUSHROOM) {
-        z.yx *= Rotate (sin (time / 5.0));
-      }
+      z.yx *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 5.0));
 
       z.x = abs (z.x);
       z.y = abs (z.y);
@@ -164,16 +179,9 @@ float sierpinski3 (vec3 z) {
       if (z.x - z.z < 0.0) z.xz = z.zx; // fold 2
       if (z.y - z.z < 0.0) z.zy = z.yz; // fold 3
 
-      if (fractal_type == MUSHROOM) {
-        z.yz *= Rotate (sin (time / 2.0) / 2.0);
-        //z.yx *= Rotate (sin (iTime / 2.0) / 5.0);
-        //z.yx *= Rotate(-map(mouse.x, -1.0, 1.0, 0.0, 2.0));
-        //z.xz *= Rotate (0.4336332 + 0.02 * iTime);
-        //z.yx *= Rotate (PI / 10.0);
-        z.xz *= Rotate (sin (time / 2.0) / 5.0);
-      } else if (fractal_type == BROCOLLI) {
-        z.yx *= Rotate (0.436332 + sin(time * 0.9) * 0.1 + 4.9);
-      }
+      z.yz *= (1. - transform_1) * identity2 + transform_1 * Rotate ((time / 2.0) / 2.0);
+      z.xz *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 2.0) / 5.0);
+      z.yx *= (1. - transform_2) * identity2 + transform_2 * Rotate ((0.436332 + sin(time * 0.9) * 0.1 + 4.9));
 
       z.x = z.x * Scale - Offset.x * (Scale - 1.0);
       z.y = z.y * Scale - Offset.y * (Scale - 1.0);
@@ -217,27 +225,27 @@ float SierpinskiDistanceEstimator (vec3 p) {
 vec4 RayMarcher (vec3 ro, vec3 rd) {
 
   int maximumRaySteps;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     maximumRaySteps = 100;
-  } else if (fractal_type == 4) {
+  } else if (fractal_type == BULB) {
     maximumRaySteps = 250;
-  } else if (fractal_type == 5) {
+  } else if (fractal_type == BOX) {
     maximumRaySteps = 2500;
   }
 
   float maximumDistance;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     maximumDistance = 1000.;
-  } else if (fractal_type >= 4) {
+  } else if (fractal_type >= BULB) {
     maximumDistance = 200.;
   }
 
   float minimumDistance;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     minimumDistance = 0.01;
-  } else if (fractal_type == 4) {
+  } else if (fractal_type == BULB) {
     minimumDistance = 0.0001;
-  } else if (fractal_type == 5) {
+  } else if (fractal_type == BOX) {
     minimumDistance = 0.001;
   }
 
@@ -337,23 +345,23 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
 void main () {
   // Normalized pixel coordinates (from 0 to 1)
   vec2 uv = (gl_FragCoord.xy - 0.5 * resolution.xy) / resolution.y;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     uv *= 0.2;
-  } else if (fractal_type == 4) {
+  } else if (fractal_type == BULB) {
     uv *= 1.5;
   }
 
-  if (fractal_type >= 1 && fractal_type <= 3) {
+  if (fractal_type == SPONGE) {
     uv.y -= 0.015;
   }
 
   // Ray origin
   vec3 ro;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     ro = vec3 (-40, 30.1, -10);
     ro.yz *= Rotate (-0.5 * 2.0 * PI + PI - 1.1); // Rotate thew ray with the mouse rotation
     ro.xz *= Rotate (-time * 2.0 * PI / 10.0);
-  } else if (fractal_type >= 4) {
+  } else if (fractal_type >= BULB) {
     ro = vec3 (0, 0, -2.0);
     if (fractal_type == BULB) {
       ro.z = (sin (time * 2.0 * PI / 40.0) / 4.0) + 1.75;
@@ -367,9 +375,9 @@ void main () {
   // ro.xz *= Rotate (time * 2.0 * PI / 10.0);
 
   vec3 rdo;
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     rdo = vec3 (0, 1, 0);
-  } else if (fractal_type >= 4) {
+  } else if (fractal_type >= BULB) {
     rdo = vec3 (0, 0, 1);
   }
   vec3 rd = R (uv, ro, rdo, 1.); // Ray direction (based on mouse rotation)
