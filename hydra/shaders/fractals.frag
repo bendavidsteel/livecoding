@@ -267,7 +267,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
     vec3 p = ro + totalDistance * rd; // Current position of the ray
 
     float distance = minDistToScene;
-    if (fractal_type <= 3) {
+    if (fractal_type <= SPONGE) {
       distance = SierpinskiDistanceEstimator (p); // Distance from the current position to the scene
     } else if (fractal_type == BULB) {
       distance = BulbDistanceEstimator(p);
@@ -298,7 +298,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
 
   float iterations = float (steps) + log (log (maximumDistance)) / log (2.0) - log (log (dot (curPos, curPos))) / log (2.0);
 
-  if (fractal_type <= 3) {
+  if (fractal_type <= SPONGE) {
     if (hit) {
       col.rgb = vec3 (0.8 + (length (curPos) / 8.0), 1.0, 0.8);
       col.rgb = hsv2rgb (col.rgb);
