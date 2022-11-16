@@ -12,11 +12,15 @@ precision mediump float;
 
 uniform vec2 resolution;
 uniform float time;
-uniform float var1;
-uniform float var2;
-const int fractal_type = 1;
-const float transform_1 = 0.1;
-const float transform_2 = .1;
+uniform int fractal_type;
+uniform float scale_amp;
+uniform float scale_period;
+uniform float transform_1;
+uniform float transform_2;
+uniform float ambient_amp;
+uniform float ambient_period;
+uniform float camera_amp;
+uniform float camera_speed;
 
 const mat2 identity2 = mat2 (1., 0., 0., 1.);
 
@@ -148,7 +152,7 @@ float BoxDistanceEstimator (vec3 pos) {
 
 float sierpinski3 (vec3 z) {
   const int iterations = 25;
-  float Scale = 2.0 + (sin (time / 2.0) + 1.0);
+  float Scale = 2.0 + ((scale_amp * cos (scale_period * time / 2.0)) + 1.0);
   vec3 Offset = (1. - transform_2) * 3.0 * vec3 (1.0, 1.0, 1.0) + transform_2 * vec3 (2., 4.8, 0.);
   float bailout = 1000.0;
 
@@ -158,15 +162,15 @@ float sierpinski3 (vec3 z) {
 
     if (fractal_type == TET) {
       z.yx *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 5.0));
-	    
+
       if (z.x + z.y < 0.0) z.xy = -z.yx; // fold 1
       if (z.x + z.z < 0.0) z.xz = -z.zx; // fold 2
       if (z.y + z.z < 0.0) z.zy = -z.yz; // fold 3
-	    
+
       z.yz *= (1. - transform_1) * identity2 + transform_1 * Rotate ((time / 2.0) / 2.0);
       z.xz *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 2.0) / 5.0);
       z.yx *= (1. - transform_2) * identity2 + transform_2 * Rotate ((0.436332 + sin(time * 0.9) * 0.1 + 4.9));
-	    
+
       z = z * Scale - Offset * (Scale - 1.0);
     } else {
       z.yx *= (1. - transform_1) * identity2 + transform_1 * Rotate (sin (time / 5.0));
@@ -308,7 +312,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
       col.rgb = vec3 (0.8 + (length (minDistToScenePos) / 8.0), 1.0, 0.8);
       col.rgb = hsv2rgb (col.rgb);
       col.rgb *= 1.0 / pow (minDistToScene, 1.0);
-      col.rgb /= 15.0 * map (sin (time * 3.0), -1.0, 1.0, 1.0, 3.0);
+      col.rgb /= 15.0 * map (cos (time * ambient_period * 3.0), -1.0, 1.0, 1.0, ambient_amp * 3.0);
     }
     col.rgb /= iterations / 10.0; // Ambeint occlusion
     col.rgb /= pow (distance (ro, minDistToScenePos), 2.0);
@@ -322,7 +326,7 @@ vec4 RayMarcher (vec3 ro, vec3 rd) {
       col.rgb = vec3 (0.8 + (length (minDistToScenePos) / 0.5), 1.0, 0.8);
       col.rgb = hsv2rgb (col.rgb);
       col.rgb *= 1.0 / (minDistToScene * minDistToScene);
-      col.rgb /= map (sin (time * 3.0), -1.0, 1.0, 3000.0, 50000.0);
+      col.rgb /= map (cos (time * ambient_period * 3.0), -1.0, 1.0, 3000.0, ambient_amp * 50000.0);
     }
 
     col.rgb /= steps * 0.08; // Ambeint occlusion
@@ -360,15 +364,15 @@ void main () {
   if (fractal_type <= SPONGE) {
     ro = vec3 (-40, 30.1, -10);
     ro.yz *= Rotate (-0.5 * 2.0 * PI + PI - 1.1); // Rotate thew ray with the mouse rotation
-    ro.xz *= Rotate (-time * 2.0 * PI / 10.0);
+    ro.xz *= Rotate (camera_speed * -time * 2.0 * PI / 10.0);
   } else if (fractal_type >= BULB) {
     ro = vec3 (0, 0, -2.0);
     if (fractal_type == BULB) {
-      ro.z = (sin (time * 2.0 * PI / 40.0) / 4.0) + 1.75;
-      ro.y = sin (time * 2.0 * PI / 40.0) / 4.0;
+      ro.z = (camera_amp * cos (camera_speed * time * 2.0 * PI / 40.0) / 4.0) + 1.75;
+      ro.y = camera_amp * cos (camera_speed * time * 2.0 * PI / 40.0) / 4.0;
     } else if (fractal_type == BOX) {
-      ro.yz *= Rotate ((time * PI + 1.0) / 20.0); // Rotate thew ray with the mouse rotation
-      ro.xz *= Rotate (time * 2.0 * PI / 10.0);
+      ro.yz *= Rotate ((camera_speed * time * PI + 1.0) / 20.0); // Rotate thew ray with the mouse rotation
+      ro.xz *= Rotate (camera_speed * time * 2.0 * PI / 10.0);
     }
   }
   // ro.yz *= Rotate (var1 * PI + 1.5); // Rotate thew ray with the mouse rotation
