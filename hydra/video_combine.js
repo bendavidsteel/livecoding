@@ -1,25 +1,43 @@
-// create an html5 video element
-plant_vid = document.createElement('video')
-plant_vid.autoplay = true
-plant_vid.loop = true
-// get path to video using getPaths() representing current directory in atom
-plant_vid.src = atom.project.getPaths()[0]+'/assets/Time_Lapse_of_Ancient_Liverwort_Plant_Taking_Over_the_Planter-F9uVjCIgbQk.mp4'
+vid_names = ['Cybergoth_Dance_Party-gPbVRpRgHso.mp4',
+'Magnapinna_Squid_Filmed_at_Drilling_Site-GSXqqi3ShOs.webm',
+'no_4mat_1992-BpZ2s1BrLHI_downsampled.mp4',
+'North_Sea_Big_Wave-gPy2DHHnlqQ.webm',
+'Sardine_Feeding_Frenzy_at_Monterey_Bay_Aquarium-8jrynE5EWAU.webm',
+'Time_Lapse_of_Ancient_Liverwort_Plant_Taking_Over_the_Planter-F9uVjCIgbQk.mp4',
+'VID_20220926_191153267_downsampled.mp4'];
 
-goth_vid = document.createElement('video')
-goth_vid.autoplay = true
-goth_vid.loop = true
+// create an html5 video element
+vid = document.createElement('video')
+vid.autoplay = true
+vid.loop = true
+vid.muted = true
+
 // get path to video using getPaths() representing current directory in atom
-goth_vid.src = atom.project.getPaths()[0]+'/assets/Cybergoth_Dance_Party-gPbVRpRgHso.mp4'
+vid.src = atom.project.getPaths()[0]+'/assets/' + vid_names[Math.floor(Math.random() * vid_names.length)]
+
+vid.src = atom.project.getPaths()[0]+'/assets/' + vid_names[1]
+
+randomTime = Math.floor(Math.random() * vid.duration);
+console.log(randomTime)
+if (Number.isFinite(randomTime)) {
+	vid.currentTime = randomTime;
+}
 
 // use video within hydra
-s1.init({src: plant_vid})
+s1.init({src: vid})
 
-s2.init({src: goth_vid})
+src(s1).out()
 
-noise(2, 0.1)
-  .shift(0.1,0.9,0.3)
-  .color(1,1.2,0.9)
-  .modulate(s1, 0.2)
-  .modulate(s2, 0.9)
-  .
+src(s1)
+	.color(0.4,0.8,0.3).contrast(1.4)
+	.add(src(o0).modulate(o0,.04),.6)
+	.invert().brightness(0.1).contrast(1.2)
+	.modulateScale(osc(2),-0.2)
   .out()
+
+  osc(0.7,0.8,1)
+    .color(0.8, 0.9, 0.3)
+    .add(o0, () => (Math.sin(time/4) * 0.2 + fft[1]))
+    .scale(()=>Math.sin(time / 16)).rotate(0, -0.1)
+    .modulate(s1, 5)
+    .out()
