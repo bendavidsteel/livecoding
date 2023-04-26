@@ -2,7 +2,7 @@
 setcps (170/60/4)
 
 d1 $ jux (# lpf 0.2) $ n (off 0.25 (|- 12) $ off 0.125 (|- 7)  "<c*2 a(3,8) f(3,8,2) e*2>")
-  # sound "supermandolin"
+  # sound "superfm"
   # sustain 2
   # room (slow 7 $ range 0.2 0.5 sine)
   # sz 0.9
@@ -24,7 +24,7 @@ d3 $ jux rev $ s "[909 <~ 808lt>] 808sd:4 [~ [909 <808lt ~>]] [808sd <~ 808lt>]"
   # djf (slow 5 $ range 0.3 0.4 cosine)
   # squiz "<1 1 1.05>"
   # room 0.6
-  # gain 0.7
+  # gain 1.0
 
 d4 $ every 2 ("<0.125 0.5>" <~) $ s "[808oh(9,16), hc(5,16)]"
   # n (irand "<1 1 1 10>")
@@ -32,7 +32,7 @@ d4 $ every 2 ("<0.125 0.5>" <~) $ s "[808oh(9,16), hc(5,16)]"
   # room 0.1
   # sz 0.05
   # pan (slow 4 $ range 0.3 0.7 sine)
-  # gain 0.7
+  # gain 0.9
 
 d1 $ s "bd"
 

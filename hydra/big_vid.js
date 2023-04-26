@@ -19,9 +19,9 @@ max_change_counter_1 = 80;
 max_change_counter_2 = 40;
 
 numBins = 4
-cutoff = 1
+cutoff = 0.05
 smooth = 0.995
-max = 7
+max = 3
 vol = 0
 vol_mov_avg = 0;
 bins = Array(numBins).fill(0)
@@ -30,8 +30,7 @@ fft = Array(numBins).fill(0)
 
 vid_names = ['Magnapinna_Squid_Filmed_at_Drilling_Site-GSXqqi3ShOs.webm',
 'North_Sea_Big_Wave-gPy2DHHnlqQ.webm',
-'Time_Lapse_of_Ancient_Liverwort_Plant_Taking_Over_the_Planter-F9uVjCIgbQk.mp4',
-'VID_20220926_191153267_downsampled.mp4'];
+'Time_Lapse_of_Ancient_Liverwort_Plant_Taking_Over_the_Planter-F9uVjCIgbQk.mp4'];
 
 vid = document.createElement('video')
 vid.autoplay = true
@@ -42,7 +41,7 @@ vid.src = atom.project.getPaths()[0]+'/assets/' + vid_names[0];
 
 audio = document.createElement("audio");
 audio.loop = true;
-audio.src = atom.project.getPaths()[0]+'/assets/034.wav';
+audio.src = atom.project.getPaths()[0]+'/assets/Master.wav';
 context = new AudioContext();
 source = context.createMediaElementSource(audio);
 source.connect(context.destination);
@@ -115,11 +114,13 @@ p1.draw = () => {
     if (vol > 1.4 && vol <= 1.7) {
       src(s1)
         .color(fft[0],fft[1],fft[2])
+        .saturate(1.2)
         .out()
     }
     if (vol > 1.7 && vol <= 2.1) {
       src(s1)
         .color(fft[3],fft[2],fft[1])
+        .saturate(1.5)
         .out()
     }
     if (vol > 2.1 && vol <= 2.3) {

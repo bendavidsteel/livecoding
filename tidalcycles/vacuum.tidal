@@ -8,7 +8,7 @@ d1 $ s "808bd!4"
   # djf (slow 3 $ range 0.3 0.5 sine)
   # gain 1.2
 
-d6 $ s "[~ <cp cp cp cp [cp ~ ~ ~ cp]>]*2"
+d2 $ s "[~ <cp cp cp cp [cp ~ ~ ~ cp]>]*2"
   # n "[1 3 <1 4>]*3"
   # nudge (range 0 0.01 rand)
   # sz 0.4
@@ -16,7 +16,7 @@ d6 $ s "[~ <cp cp cp cp [cp ~ ~ ~ cp]>]*2"
   # gain 1.2
   # pan (slow 3 sine)
 
-d2 $ ghost $ degradeBy 0.1 $ s "[[~!2 808oh ~]*4, [hc!2 ~ hc] [hc!2 ~!2] [hc ~!2 hc] [hc!2 ~ hc]]"
+d3 $ ghost $ degradeBy 0.1 $ s "[[~!2 808oh ~]*4, [hc!2 ~ hc] [hc!2 ~!2] [hc ~!2 hc] [hc!2 ~ hc]]"
   # n "[1 <2 3> <1 5>]*3"
   # nudge (range 0 0.01 rand)
   # pan (slow 2 sine)
@@ -33,14 +33,35 @@ d5 $ s "[~!3 [~!2 808sd ~], ~ [~!3 808sd] [~ 808sd ~!2] ~]"
   # sz 0.4
   # room 0.7
 
-d3 $ slow 5 $ note "f'min9 [af'maj9'i c'min7'i] f'min9 [af'maj7 c'min7] f'min11"
+d6 $ slow 5 $ note "f'min9 [a'maj9'i c'min7'i] f'min9 [a'maj7 c'min7] f'min11"
   # sound "superfm"
-  # voice 4
+  # voice 7
+  # sustain 4
   # room (slow 7 $ range 0.4 0.7 sine)
   # sz 0.9
   # pan (slow 2 $ range 0.3 0.7 sine)
-  # gain 0.65
+  # gain 0.5
 
-d3 $ silence
+d7 $ jux (# lpf 0.2) $ n (off 0.25 (|- 12) $ off 0.125 (|- 7)  "<c*2 a(3,8) f(3,8,2) e*2>")
+  # sound "superfm"
+  # voice 5
+  # sustain 2
+  # room (slow 7 $ range 0.2 0.5 sine)
+  # sz 0.9
+  # pan (slow 2 $ range 0.3 0.7 sine)
+  # gain (slow 13 $ range 0.5 0.7 sine)
+
+d8 $ n (off 0.125 (|+7) $ off 0.25 (|+12) "[c e g a]/4")
+  # sound "supermandolin"
+  # voice 6
+  # detune (slow 5 $ range 0.1 1 sine)
+  # distort (slow 11 $ range 0.1 0.4 sine)
+  # room 0.2
+  # sz 0.5
+  # gain (slow 19 $ range 0.6 0.8 sine)
+
+d9 $ 
+
+d8 $ silence
 
 hush
